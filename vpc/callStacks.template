@@ -1,0 +1,47 @@
+{
+           "AWSTemplateFormatVersion": "2010-09-09",
+           "Resources": {
+                        "VPCchild": {
+                         "Type" : "AWS::CloudFormation::Stack",
+                                "Properties" : {
+                            "Parameters" : {
+                                        "validCIDR": "10.0.0.0/16",
+                                        "VPCName": "bymaintemplate",
+                                         "IGWName": "IGWbymaintemp",
+                                         "DNSHostname": "true",
+                                         "DNSSupport": "true"
+                                    },
+                           "TemplateURL" : "https://s3-us-west-2.amazonaws.com/test-for-one-call/VPCIGW.template"
+                                 }
+                        },
+                        "publicRouteTable": {
+                        "DependsOn" : "VPCchild",
+                         "Type" : "AWS::CloudFormation::Stack",
+                                "Properties" : {
+                         "Parameters" : {
+                                        "IDofIGW": { "Fn::GetAtt" : [ "VPCchild", "Outputs.IGWId" ] },
+                                        "VpcId": { "Fn::GetAtt" : [ "VPCchild", "Outputs.VPCId" ] },
+                                        "RouteTableName": "test-route-table"
+                                    },
+                           "TemplateURL" : "https://s3-us-west-2.amazonaws.com/test-for-one-call/VPCPubRouteTable.template"
+                                 }
+                        },
+                        "publicSubnet": {
+                        "DependsOn" : ["publicRouteTable", "VPCchild"],
+                         "Type" : "AWS::CloudFormation::Stack",
+                                "Properties" : {
+                         "Parameters" : {                                        
+                                        "VPC": { "Fn::GetAtt" : [ "VPCchild", "Outputs.VPCId" ] },
+                                        "SubnetNameTagValue": "testSubnet",
+                                        "CIDR" : "10.0.0.0/28",
+                                        "availabilityZone": "us-west-2a",
+                                        "PublicIPOnLaunch": "true",
+                                        "RouteTableId":  { "Fn::GetAtt" : [ "publicRouteTable", "Outputs.RouteTableId" ] }
+                                    },
+                           "TemplateURL" : "https://s3-us-west-2.amazonaws.com/test-for-one-call/VPCSubnet.template"
+                                 }
+                        }
+
+
+                }
+        }

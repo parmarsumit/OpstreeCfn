@@ -1,0 +1,45 @@
+{
+           "AWSTemplateFormatVersion": "2010-09-09",
+         "Parameters" : {
+         	 "VolumeName": {
+            		"Description": "Name of the Volume",
+            		"Type": "String",
+            		"ConstraintDescription": "give the value of name to volume"
+       			 },
+         	"instance": {
+                        "Type": "List<AWS::EC2::Instance::Id>",
+                        "Description": "Select instances"
+                },
+            "availabilityZone": {
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "Description": "Availability zone of EC2 instance"
+        		},
+        	"Size" : {
+      				"Description" : "specify volume size for EC2 instance",
+     				"Type" : "String",
+      				"Default" : "20"
+    			}
+         	},
+           "Resources": {
+           		"NewVolume" : {
+           			"Type" : "AWS::EC2::Volume",
+           			"Properties" : {
+           				"Size" : { "Ref" : "Size" },
+           				"AvailabilityZone" : { "Ref" : "availabilityZone" },
+           					"Tags" : [ {
+           						"Key" : "Name",
+         						"Value" : { "Ref" : "VolumeName" }
+         						}
+         						]
+         						}
+         					},
+				"Mount" : {
+   					"Type" : "AWS::EC2::VolumeAttachment",
+   					"Properties" : {
+      					"InstanceId" : { "Ref" : "instance" },
+      					"VolumeId"  : { "Ref" : "NewVolume" },
+      					"Device" : "/dev/sdh"
+   								}
+							}
+							}
+						}

@@ -1,0 +1,84 @@
+ {
+ 	"AWSTemplateFormatVersion": "2010-09-09",
+ 	"Parameters": {
+
+ 		"VPC": {
+ 			"Description": "Select a VPC",
+ 			"Type": "AWS::EC2::VPC::Id"
+ 		},
+ 		"SubnetNameTagValue": {
+ 			"Description": "Put the name of the Subnet",
+ 			"Type": "String",
+ 			"ConstraintDescription": "give the value of name tag for Subnet"
+ 		},
+ 		"PublicIPOnLaunch": {
+ 			"Default": "false",
+ 			"Description": "enable or disable public IP to instance of Subnet",
+ 			"Type": "String",
+ 			"AllowedValues": [
+ 				"true",
+ 				"false"
+ 			],
+ 			"ConstraintDescription": "must be only true or false."
+ 		},
+ 		"CIDR": {
+ 			"Description": "CIDR must be in proper range",
+ 			"Type": "String",
+ 			"MinLength": "9",
+ 			"MaxLength": "18",
+ 			"Default": "10.0.0.0/24",
+ 			"AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+ 			"ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+ 		},
+ 		"availabilityZone": {
+ 			"Type": "AWS::EC2::AvailabilityZone::Name",
+ 			"Description": "Availability zone"
+ 		},
+    "RouteTableId": {
+      "Type": "String",
+      "Description": "Id of Route table to which Subnet will be associated"
+    }
+ 	},
+ 	"Resources": {
+ 		"Subnet": {
+ 			"Type": "AWS::EC2::Subnet",
+ 			"Properties": {
+ 				"VpcId": {
+ 					"Ref": "VPC"
+ 				},
+ 				"MapPublicIpOnLaunch": {
+ 					"Ref": "PublicIPOnLaunch"
+ 				},
+ 				"CidrBlock": {
+ 					"Ref": "CIDR"
+ 				},
+ 				"AvailabilityZone": {
+ 					"Ref": "availabilityZone"
+ 				},
+ 				"Tags": [{
+ 					"Key": "Name",
+ 					"Value": {
+ 						"Ref": "SubnetNameTagValue"
+ 					}
+ 				}]
+ 			}
+ 		},
+    "SubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "Subnet"
+        },
+        "RouteTableId": {
+          "Ref": "RouteTableId"
+        }
+      }
+    }
+ 	},
+  "Outputs": {
+      "SubnetId" : {
+        "Description" : "Id of Subnet",
+        "Value" : {"Ref" : "Subnet"}
+      }
+  }
+ }

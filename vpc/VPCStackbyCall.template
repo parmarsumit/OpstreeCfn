@@ -1,0 +1,19 @@
+{
+	   "AWSTemplateFormatVersion": "2010-09-09",
+	   "Resources": {
+			"mainTemplate": {
+	  		 "Type" : "AWS::CloudFormation::Stack",
+	   			"Properties" : {
+	     		 "Parameters" : { 
+					"validCIDR": "10.0.0.0/16",
+	 				"VPCName": "bymaintemplate",
+					 "IGWName": "IGWbymaintemp",
+					 "DNSHostname": "true",
+					 "DNSSupport": "true"
+	  			    },
+	   		   "TemplateURL" : "https://s3-us-west-2.amazonaws.com/test-bucket-one-click-main/vpc.template"
+	  			 }
+			}
+		}
+	}
+

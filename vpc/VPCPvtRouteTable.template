@@ -1,0 +1,54 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "VpcId": {
+            "Type": "AWS::EC2::VPC::Id",
+            "Description": "VpcId of your existing Virtual Private Cloud (VPC)"
+        },
+        "RouteTableName": {
+            "Description": "Name of the route table ",
+            "Type": "String",
+            "ConstraintDescription": "give the value of name tag for Route Table"
+        },
+
+        "IDofNAT": {
+            "Description": "Put the Nat instance ID",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "PrivateRouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VpcId"
+                },
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": {
+                        "Ref": "RouteTableName"
+                    }
+                }]
+            }
+        },
+        "PrivateRoute": {
+            "DependsOn": "PrivateRouteTable",
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "InstanceId": {
+                    "Ref": "IDofNAT"
+                }
+            }
+        }
+    },
+    "Outputs": {
+				"RouteTableId" : {
+					"Description" : "Id of RouteTable",
+					"Value" : {"Ref" : "PrivateRouteTable"}
+				}
+		}
+}

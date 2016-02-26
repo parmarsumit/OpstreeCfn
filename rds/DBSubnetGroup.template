@@ -1,0 +1,38 @@
+
+
+{
+"AWSTemplateFormatVersion": "2010-09-09",   
+"Parameters" : {
+
+"SubnetID": {
+         "Type": "List<AWS::EC2::Subnet::Id>",
+         "Description": "List of an existing subnet IDs"
+   },
+"Name": {
+  "Type": "String",
+   "Description": "Enter the name of DB Subnet"
+},
+"Description": {
+  "Type": "String",
+   "Description": "Describe your DB subnet"
+}
+},
+
+  
+
+"Resources" : {
+   "DBSubnetGroup" : {
+   "Type" : "AWS::RDS::DBSubnetGroup",
+   "Properties" : {
+       "DBSubnetGroupDescription" : {"Ref": "Description"},
+      "SubnetIds" : {"Ref": "SubnetID"},
+      "Tags": [{
+            "Key": "Name",
+            "Value": {
+              "Ref": "Name"
+            }
+          }]
+         }
+      }
+   }
+}

@@ -1,0 +1,82 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Parameters": {
+		"SubnetID": {
+			"Type": "List<AWS::EC2::Subnet::Id>",
+			"Description": "List of an existing subnet IDs to use for the load balancer"
+		},
+		"loadBalancerName": {
+			"Type": "String",
+			"Description": "Give name to this load-balancer"
+		},
+		"instancesInELB": {
+			"Type": "List<AWS::EC2::Instance::Id>",
+			"Description": "Select instances"
+		},
+		"LoadBalancerPort": {
+			"Type": "Number",
+			"Description": "Enter the ELB port-number to communicate with instance(Example: 80)"
+		},
+		"instancePort": {
+			"Type": "Number",
+			"Description": "Enter the instance port-number to communicate with instance(Example: 80)"
+		},
+		"Protocol": {
+			"Type": "String",
+			"Default": "TCP",
+			"Description": "Enter the Host port-number to communicate with container (Example: TCP, HTTP, HTTPS, SSL)",
+			"AllowedValues": [
+				"TCP",
+				"HTTP",
+				"HTTPS",
+				"SSL"
+			]
+		},
+		"Path": {
+			"Type": "String",
+			"Description": "Enter path to ping by health check (Example: /index.html). Note: only in case you are using the protocol: HTTP or HTTPS otherwise leave this field blank."
+		}
+	},
+	"Resources": {
+		"EcsElasticLoadBalancer": {
+			"Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+			"Properties": {
+				"Subnets": {
+					"Ref": "SubnetID"
+				},
+				"Instances": {
+					"Ref": "instancesInELB"
+				},
+				"LoadBalancerName": {
+					"Ref": "loadBalancerName"
+				},
+				"Listeners": [{
+					"LoadBalancerPort": {
+						"Ref": "LoadBalancerPort"
+					},
+					"InstancePort": {
+						"Ref": "instancePort"
+					},
+					"Protocol": {
+						"Ref": "Protocol"
+					}
+				}],
+				"HealthCheck": {
+					"Target": {
+						"Fn::Join": ["", [{
+							"Ref": "Protocol"
+						}, ":", {
+							"Ref": "instancePort"
+						}, {
+							"Ref": "Path"
+						}]]
+					},
+					"HealthyThreshold": "2",
+					"UnhealthyThreshold": "10",
+					"Interval": "30",
+					"Timeout": "5"
+				}
+			}
+		}
+	}
+}

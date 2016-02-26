@@ -1,0 +1,62 @@
+	{
+	   "AWSTemplateFormatVersion": "2010-09-09",
+	   "Resources": {
+			"instance1": {
+	  		 "Type" : "AWS::CloudFormation::Stack",
+	   			"Properties" : {
+	     		 "Parameters" : { 
+					"KeyName": "My_bb_Keypair",
+	 				"availabilityZone": "us-west-2a",
+					 "myImageID": "ami-5189a661",
+					 "SubnetID": "subnet-398c895c",
+					 "SecurityGroupIds": "sg-c0695ba4",
+					 "InstanceType": "t2.micro"
+	  			    },
+	   		   "TemplateURL" : "https://s3-us-west-2.amazonaws.com/test-bucket-one-click-main/ec2instance.template",
+	   		   "Tags": [{
+						"Key": "Name",
+						"Value": "App-instance-zone-a"
+					}]
+	  			 }
+			},
+			
+			"instance2": {
+	  		 "Type" : "AWS::CloudFormation::Stack",
+	   			"Properties" : {
+	     		 "Parameters" : { 
+					"KeyName": "My_bb_Keypair",
+	 				"availabilityZone": "us-west-2b",
+					 "myImageID": "ami-5189a661",
+					 "SubnetID": "subnet-598ed52e",
+					 "SecurityGroupIds": "sg-c0695ba4",
+					 "InstanceType": "t2.micro"
+	  			    },
+	   		   "TemplateURL" : "https://s3-us-west-2.amazonaws.com/test-bucket-one-click-main/ec2instance.template",
+	   		   "Tags": [{
+						"Key": "Name",
+						"Value": "App-instance-zone-b"
+					}]
+	  			 }
+			},
+			
+			"instance3": {
+	  		 "Type" : "AWS::CloudFormation::Stack",
+	   			"Properties" : {
+	     		 "Parameters" : { 
+					"KeyName": "My_bb_Keypair",
+	 				"availabilityZone": "us-west-2a",
+					 "myImageID": "ami-5189a661",
+					 "SubnetID": "subnet-658f8a00",
+					 "SecurityGroupIds": "sg-c0695ba4",
+					 "InstanceType": "t2.micro"
+	  			    },
+	   		   "TemplateURL" : "https://s3-us-west-2.amazonaws.com/test-bucket-one-click-main/ec2instance.template",
+	   		   "Tags": [{
+						"Key": "Name",
+						"Value": "maintaince-instance"
+					}]
+	  			 }
+			}
+		}
+	
+}

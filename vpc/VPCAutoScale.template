@@ -1,0 +1,191 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Web Server Auto Scale",
+  "Parameters": {
+    "VPC": {
+      "Type": "List<AWS::EC2::VPC::Id>",
+      "ConstraintDescription": "VPC in which the auto scale group will be launched into"
+    },
+    "SecurityGroups": {
+      "Type": "List<AWS::EC2::SecurityGroup::Id>",
+      "ConstraintDescription": "List of security groups that the instances will be assigned"
+    },
+    "Subnets": {
+      "Type": "List<AWS::EC2::Subnet::Id>",
+      "ConstraintDescription": "Subnets to be used by the Auto Scale Group"
+    },
+    "KeyName": {
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription": "Key pair used to access the instances"
+    },
+    "InstanceType": {
+      "Type": "String",
+      "Default": "m3.medium",
+      "ConstraintDescription": "Instance size to be used for the auto scale"
+    },
+    "ImageId": {
+      "Type": "String",
+      "AllowedPattern": "ami-[a-f0-9]+",
+      "Default": "ami-456a177f",
+      "ConstraintDescription": "AMI name that will be used for auto scaling"
+    },
+    "DiskSize": {
+      "Type": "Number",
+      "Default": "8",
+      "ConstraintDescription": "Disk size for the new instances"
+    },
+    "MinSize": {
+      "Type": "Number",
+      "Default": "2",
+      "ConstraintDescription": "Minimum number of EC2 Instances in the ASG"
+    },
+    "MaxSize": {
+      "Type": "Number",
+      "Default": "8",
+      "ConstraintDescription": "Maximum number of EC2 Instances in the ASG"
+    },
+    "Desired": {
+      "Type": "Number",
+      "Default": "2",
+      "ConstraintDescription": "Desired dumber of EC2 Instances in the ASG cannot be less than MinSize"
+    },
+    "ElasticLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Description": "ElasticLoadBalancer to be associated"
+    }
+  },
+  "Resources": {
+    "WebLaunchConfiguration": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Properties": {
+        "AssociatePublicIpAddress": true,
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "VolumeSize": {
+                "Ref": "DiskSize"
+              }
+            }
+          }
+        ],
+        "ImageId": {
+          "Ref": "ImageId"
+        },
+        "InstanceMonitoring": true,
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "SecurityGroups": {
+          "Ref": "SecurityGroups"
+        },
+        "AssociatePublicIpAddress" : false,
+        "LoadBalancerNames" : [ { "Ref" : "ElasticLoadBalancer" } ],
+      }
+    },
+    "WebAutoScalingGroup": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "AvailabilityZones": {
+          "Fn::GetAZs": ""
+        },
+        "Cooldown": "60",
+        "MaxSize": {
+          "Ref": "MaxSize"
+        },
+        "MinSize": {
+          "Ref": "MinSize"
+        },
+        "DesiredCapacity": {
+          "Ref": "Desired"
+        },
+        "HealthCheckGracePeriod": 300,
+        "HealthCheckType": "ELB",
+        "LaunchConfigurationName": {
+          "Ref": "WebLaunchConfiguration"
+        },
+        "TerminationPolicies": [
+          "OldestLaunchConfiguration",
+          "ClosestToNextInstanceHour"
+        ],
+        "VPCZoneIdentifier": {
+          "Ref": "Subnets"
+        },
+        "Tags": [
+          {
+          "Key"   : "Name", "Value" : "ASG",
+          "PropagateAtLaunch" : true
+          }
+        ]
+      },
+      "UpdatePolicy": {
+        "AutoScalingRollingUpdate": {
+          "MinInstancesInService": "2",
+          "MaxBatchSize": "2",
+          "PauseTime": "PT5M0S"
+        }
+      }
+    },
+    "ScaleUpPolicy": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "AutoScalingGroupName": {
+          "Ref": "WebAutoScalingGroup"
+        },
+        "Cooldown": "30",
+        "ScalingAdjustment": "1"
+      }
+    },
+    "ScaleDownPolicy": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "AutoScalingGroupName": {
+          "Ref": "WebAutoScalingGroup"
+        },
+        "Cooldown": "60",
+        "ScalingAdjustment": "-1"
+      }
+    },
+    "CPUScaleUpAlarm": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmDescription": "Scale Up Web Servers",
+        "AlarmActions": [
+          {
+            "Ref": "ScaleUpPolicy"
+          }
+        ],
+        "MetricName": "CPUUtilization",
+        "Namespace": "AWS/EC2",
+        "Statistic": "Average",
+        "Period": "60",
+        "EvaluationPeriods": "3",
+        "Threshold": "60",
+        "ComparisonOperator": "GreaterThanThreshold"
+      }
+    },
+    "CPUScaleDownAlarm": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmDescription": "Scale Down Web servers",
+        "AlarmActions": [
+          {
+            "Ref": "ScaleDownPolicy"
+          }
+        ],
+        "MetricName": "CPUUtilization",
+        "Namespace": "AWS/EC2",
+        "Statistic": "Average",
+        "Period": "60",
+        "EvaluationPeriods": "3",
+        "Threshold": "49",
+        "ComparisonOperator": "LessThanThreshold"
+      }
+    }
+  }
+}

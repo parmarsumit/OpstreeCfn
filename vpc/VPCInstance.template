@@ -1,0 +1,66 @@
+{
+"AWSTemplateFormatVersion": "2010-09-09",
+"Parameters" : {
+    "KeyName" : {
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+      "Type" : "AWS::EC2::KeyPair::KeyName",
+      "Default" : "mykey"
+    },
+"myImageID": {
+   "Type": "AWS::EC2::Image::Id",
+   "Description": "Image ID"
+},
+"SubnetID": {
+         "Type": "AWS::EC2::Subnet::Id",
+         "Description": "List of an existing subnet IDs"
+   },
+"Environment" : {
+      "Description" : "specify the deployment type. Default is production",
+      "Type" : "String",
+      "Default" : "Prod"
+    },
+"Name" : {
+      "Description" : "specify the deployment type. Default is production",
+      "Type" : "String",
+      "Default" : "Provide Instance Name"
+    },
+"Project" : {
+      "Description" : "specify the deployment type. Default is production",
+      "Type" : "String",
+      "Default" : "Provide Project Name"
+    },
+"SecurityGroupIds": {
+      "Description": "Security groups that can be used to access the EC2 instances",
+      "Type": "List<AWS::EC2::SecurityGroup::Id>",
+      "ConstraintDescription": "must be list of EC2 security group ids"
+    },
+"InstanceType" : {
+    "Type" : "String",
+    "Default" : "m3.medium",
+    "AllowedValues" : ["t2.micro", "m1.small", "m3.medium", "m1.large", "m1.medium", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge"],
+    "Description" : "Enter m3.medium, m1.small, or m1.large. Default is t1.micro."
+  }
+},
+"Resources" : {
+   "EC2Instance" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+         "ImageId" : { "Ref" : "myImageID" },
+         "InstanceType" : { "Ref" : "InstanceType" },
+         "KeyName" : { "Ref" : "KeyName" },
+         "SecurityGroupIds" : { "Ref" : "SecurityGroupIds" },
+         "SubnetId" : { "Ref" : "SubnetID" },
+         "Tags" : [{"Key" : "Name", "Value" : { "Ref" : "Name"}},
+            {"Key" : "Environment", "Value" :{"Ref" : "Environment"}},
+            {"Key" : "Project","Value" :{"Ref" : "Project"}}
+   ]
+         }
+      }
+   },
+   "Outputs": {
+       "InstanceId" : {
+         "Description" : "Id of Instance",
+         "Value" : {"Ref" : "EC2Instance"}
+       }
+   }
+}

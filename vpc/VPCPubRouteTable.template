@@ -1,0 +1,53 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "VpcId": {
+            "Type": "AWS::EC2::VPC::Id",
+            "Description": "VpcId of your existing Virtual Private Cloud (VPC)"
+        },
+        "RouteTableName": {
+            "Description": "Name of the route table ",
+            "Type": "String",
+            "ConstraintDescription": "give the value of name tag for Route Table"
+        },
+        "IDofIGW": {
+            "Description": "Put IGW gateway ID",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "RouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VpcId"
+                },
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": {
+                        "Ref": "RouteTableName"
+                    }
+                }]
+            }
+        },
+        "PubRoute": {
+            "DependsOn": "RouteTable",
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "RouteTable"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "IDofIGW"
+                }
+            }
+        }
+    },
+    "Outputs": {
+				"RouteTableId" : {
+					"Description" : "Id of RouteTable",
+					"Value" : {"Ref" : "RouteTable"}
+				}
+		}
+}

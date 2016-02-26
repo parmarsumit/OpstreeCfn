@@ -1,0 +1,48 @@
+{
+"AWSTemplateFormatVersion": "2010-09-09",
+"Parameters" : {
+"myVPC": {
+   "Description": "VPC in which security group will be created",
+    "Type": "AWS::EC2::VPC::Id"
+   },
+"Environment" : {
+      "Description" : "Specify the deployment type. Default is production",
+      "Type" : "String",
+      "Default" : "Prod"
+   },
+"Name" : {
+      "Description" : "Specify the SecurityGroup Name.",
+      "Type" : "String"
+   },
+"Project" : {
+      "Description" : "Specify the SecurityGroup Project Name.",
+      "Type" : "String"
+   }
+},
+"Resources": {
+"OPLWMYBB" : {
+   "Type" : "AWS::EC2::SecurityGroup",
+   "Properties" : {
+      "GroupDescription" : "Allow ssh client to access host",
+      "VpcId" : {"Ref" : "myVPC"},
+      "SecurityGroupIngress" : [{
+            "IpProtocol" : "tcp",
+            "FromPort" : "80",
+            "ToPort" : "80",
+            "CidrIp" : "0.0.0.0/0"
+         }],
+	"SecurityGroupIngress" : [{
+            "IpProtocol" : "tcp",
+            "FromPort" : "443",
+            "ToPort" : "443",
+            "CidrIp" : "0.0.0.0/0"
+         }],
+      "Tags" : [{"Key" : "Name", "Value" : { "Ref" : "Name"}},
+            {"Key" : "Environment", "Value" :{"Ref" : "Environment"}},
+            {"Key" : "Project","Value" :{"Ref" : "Project"}}
+   ]
+      }
+   }
+}
+}
+

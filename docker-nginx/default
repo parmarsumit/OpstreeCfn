@@ -1,0 +1,12 @@
+upstream www {
+              server 172.17.0.4;
+#server 10.5.105.3;
+#server 10.5.105.4;
+             }
+server {
+        listen 80;
+        server_name en.opstree.com;
+location / {
+            proxy_pass http://www;
+           }
+}

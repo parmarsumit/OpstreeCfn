@@ -1,0 +1,19 @@
+{
+"AWSTemplateFormatVersion": "2010-09-09",   
+"Parameters" : {
+"instanceID": {
+   "Type": "AWS::EC2::Instance::Id",
+   "Description": "Intance ID"
+	}
+},
+"Resources" : {
+"MyEC2Instance" : {
+   "Type" : "AWS::EC2::EIP",
+   "Properties" : {
+      "InstanceId" : {"Ref" : "instanceID"},
+      "Domain" : "vpc"
+    	    }
+		}
+
+	}
+}
